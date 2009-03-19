@@ -42,6 +42,8 @@ $cmd= "set -o pipefail && ";
 # ASM macros are now done via "as", previously via 
 # " gcc " . $ENV{"COLLECT_GCC_OPTIONS"} . " -S $tmp | " .
 	($opt{"M"} ? "" : 
+# This is not entirely correct - we'd have to pass options like the 
+# destination architecture (32/64) etc.
 		" $AS -alm -o /dev/null - | " .
 
 		($opt{"D"} ? " tee /tmp/a2-$$.s | " : "") ) .
