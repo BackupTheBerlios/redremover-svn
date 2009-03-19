@@ -1,22 +1,56 @@
-# Some parts don't work, eg. because they're shared libraries, or get 
-# compiled for another architecture or CPU mode (32/64), or
+
+# Some parts don't work with translation, eg. because they're shared 
+# libraries, or get compiled for another architecture or CPU mode (32/64), 
+# or whatever ... here's a list of make targets that I did *without* 
+# translation.
 make arch/x86/vdso arch/x86/vdso/vclock_gettime.o
 # or get badly listed by the assembler ("wakeup_long64" defined twice - 
 # because of ENTRY?).
 make arch/x86/acpi/wakeup_64.o arch/x86/lib/copy_user_64.o
 
+make arch/x86/kernel/efi.o
 
 
 
-Normally I try to compile with this line:
+Furthermore, to get the kernel compilation to *really* take the archive, 
+this patch was necessary:
+
+------------------------------> Patch START 
+
+--- linux-2.6.27.6.orig/Makefile	2009-03-18 22:06:18.000000000 +0100
++++ linux-2.6.27.6.redrum/Makefile	2009-03-18 22:06:24.000000000 +0100
+@@ -636,7 +636,7 @@
+ net-y		:= $(patsubst %/, %/built-in.o, $(net-y))
+ libs-y1		:= $(patsubst %/, %/lib.a, $(libs-y))
+ libs-y2		:= $(patsubst %/, %/built-in.o, $(libs-y))
+-libs-y		:= $(libs-y1) $(libs-y2)
++libs-y		:= $(libs-y1) $(libs-y2) -L/usr/src/redrum -lredrum
+ 
+ # Build vmlinux
+ # ---------------------------------------------------------------------------
+
+------------------------------> Patch END
+ 
+
+The rest could be (nearly) done via this:
 	ASM_SUBST_OPT="" \
 		HOST_LOADLIBES="-L/usr/src/redrum -lredrum" \
 		ASM_SUBST_DIR=/usr/src/redrum/ \
 		make vmlinux -k -j3
 
-and then take a look at individual problems via
+On problems I took a look via this:
 	ASM_SUBST_OPT="-d -D"
 		HOST_LOADLIBES="-L/usr/src/redrum -lredrum" \
 		ASM_SUBST_DIR=/usr/src/redrum/ \
 		make vmlinux
+
+
+The kernel doesn't finish compilation, because there's a problem with 
+symbol translation, but the result looks like:
+	$ size vmlinux.o ../l*g/vmlinux.o > /tmp/t
+		 text	   data	    bss	    dec	    hex	filename
+	4163416	2065456	6561440	12790312	 c32a28	vmlinux.o
+	4193934	2065472	6561440	12820846	 c3a16e	../linux-2.6.27.6.orig/vmlinux.o
+
+This is a 30500 bytes saved, or 0.73 percent.
 

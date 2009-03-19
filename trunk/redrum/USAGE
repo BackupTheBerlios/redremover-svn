@@ -41,6 +41,10 @@ suitable fragments into the given path.
 
 Furthermore this can give a rough estimate of the bytes saved.
 
+In the directory given a Makefile is installed, which allows to simply 
+compile a archive of these fragments; this archive can then be used on 
+linking via "-L<directory> -lredrum".
+
 
 
 What now?
