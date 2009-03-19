@@ -10,6 +10,26 @@ tests:
 	./run-tests
 .PHONY: tests
 
+BINPATH := /usr/bin
+ORIG := $(BINPATH)/as
+RENAME_TO := $(ORIG).bin
+install:
+	@echo '# Installation needs UID 0, so here are just the commands.'
+	@echo '# Use them at your own risk.'
+	@echo	'#'
+	@echo	'#'
+	@echo '# Installation commands'
+	@echo	'#'
+	@echo	'# 1) Divert original assembler'
+	@echo 'test -L $(ORIG) || mv $(ORIG) $(RENAME_TO) &&' 
+	@echo	'# 2) Install own assembler script'
+	@echo 'ln -sf $(abspath new-as) $(ORIG) &&'
+	@echo	'# 3) Tell new assembler script where the translator is'
+	@echo 'ln -sf $(abspath new-as) $(BINPATH)/rr-translate'
+	@echo	'# 4) Profit by analysing and re-compiling.'
+	@echo	'#'
+	
+
 
 ############################################################
 #
