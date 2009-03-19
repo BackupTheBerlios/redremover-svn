@@ -1,1 +1,12 @@
-HOST_LOADLIBES="-L/usr/src/redrum -lredrum" ASM_SUBST_DIR=/usr/src/redrum/ make arch/x86/kernel/entry_64.o V=1
+# Some parts don't work, eg. because they're shared libraries, or get 
+# compiled for another architecture or CPU mode (32/64, see comment in 
+# new-as).
+make arch/x86/vdso/vclock_gettime.o arch/x86/vdso
+
+
+ASM_SUBST_OPT="-d -D"
+
+ASM_SUBST_OPT="" \
+	HOST_LOADLIBES="-L/usr/src/redrum -lredrum" \
+	ASM_SUBST_DIR=/usr/src/redrum/ \
+	make vmlinux
