@@ -3,18 +3,6 @@ TODOs:
 ======
 
 
-Asm Macros:
------------
-
-Macro expansion in the assembler isn't recogniced, so common expression 
-that result from macro expansion are not compressed.
-
-"as -ahls=filename" doesn't seem to really help.
-
-Eg. with invalidate_interrupt* (arch/x86/kernel/entry_64.S:850) the macro 
-expansion should be done before.
-
-
 
 Jumps with adresses _init+0x4d
 -----------------------------

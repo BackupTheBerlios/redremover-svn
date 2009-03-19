@@ -1,0 +1,52 @@
+
+Usage
+=====
+
+
+Installation
+------------
+
+Please see the output of "make install"; this doesn't install per se, but 
+gives a shell script fragment that might be used to create the necessary 
+symlinks in /usr/bin.
+
+
+
+Translated compilation
+----------------------
+
+Once the scripts are installed, the translation can be activated by setting 
+the environment variable "ASM_SUBST_DIR" to the path of a directory with 
+assembler files (with suffix ".s").
+
+These files are read by the translation script, and when a matching 
+assembler fragment is found, it is replaced by a jump to a labelled 
+destination from the fragment.
+
+Furthermore you can set these flags in the environment variable 
+"ASM_SUBST_OPT":
+   -M   don't do the assembler macro substitution via "as -alm"
+   -d   debug information
+   -D   write the input and output of the translation into "/tmp/as?-*.s".
+
+
+
+How to get to such assembler fragments
+--------------------------------------
+
+In the src/ directory you can find the script "rr-analyse.pl", which allows 
+to look at the disassembled output of binaries (by using "objdump"), and 
+(by using the option "-o <directory>") automatically writes a list of 
+suitable fragments into the given path.
+
+Furthermore this can give a rough estimate of the bytes saved.
+
+
+
+What now?
+---------
+
+There are a few loose ends; the translation doesn't always work, 
+translation of conditional jumps has to be tested/fixed, and so on.
+
+There's a TODO in the src/ directory.
