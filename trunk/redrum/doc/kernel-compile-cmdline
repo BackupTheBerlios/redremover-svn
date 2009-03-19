@@ -1,7 +1,9 @@
 # Some parts don't work, eg. because they're shared libraries, or get 
-# compiled for another architecture or CPU mode (32/64, see comment in 
-# new-as).
-make arch/x86/vdso/vclock_gettime.o arch/x86/vdso
+# compiled for another architecture or CPU mode (32/64), or
+make arch/x86/vdso arch/x86/vdso/vclock_gettime.o
+# or get badly listed by the assembler ("wakeup_long64" defined twice - 
+# because of ENTRY?).
+make arch/x86/acpi/wakeup_64.o arch/x86/lib/copy_user_64.o
 
 
 
