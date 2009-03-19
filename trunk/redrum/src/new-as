@@ -37,13 +37,6 @@ $cmd= "set -o pipefail && ";
 # such lines are currently ignored.
 	" perl -pe 's#;#\\n#g unless /\.(asciz|string)/;' |" .
 
-# Bug in as 2.19.1: sometimes multiple strings get written in a single 
-# line, like this one with 27k characters:
-#   .string " \t\n\\".LC3: .string "file\t".LC4: .string "partition"...
-# The other strings are repeated in lines below, too - so we just kill 
-# them here.
-	q( perl -pe 's/(\.string ".*?[\\\\]{2}")\.L.*/$1/;' |) .
-
 	($opt{"D"} ? " tee /tmp/a1-$$.s | " : "") .
 
 # ASM macros are now done via "as", previously via 
@@ -52,6 +45,17 @@ $cmd= "set -o pipefail && ";
 # This is not entirely correct - we'd have to pass options like the 
 # destination architecture (32/64) etc.
 		" $AS -alm -o /dev/null - | " .
+
+# Bug in as 2.19.1: sometimes multiple strings get written in a single 
+# line, like this one with 27k characters:
+#   .string " \t\n\\".LC3: .string "file\t".LC4: .string "partition"...
+# The other strings are repeated in lines below, too - so we just kill 
+# them here.
+	q( perl -pe 's/(\.string\s+".*?[\\\\]{2}").*/$1/;' |) .
+
+
+# The assembler listing gives two labels for ENTRY(wakeup_long64) in
+# arch/x86/kernel/acpi/wakeup_64.S; this is fixed in rr-translate.pl.
 
 		($opt{"D"} ? " tee /tmp/a2-$$.s | " : "") ) .
 
