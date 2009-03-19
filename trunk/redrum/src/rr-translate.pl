@@ -355,7 +355,7 @@ sub new
 				if ($ml>$macro_level)
 				{
 					my $l=splice(@{$self->line}, -1, 1);
-					main::D("Removing line ", $l->opcode);
+#					main::D("Removing line ", $l->opcode);
 				}
 			}
 
