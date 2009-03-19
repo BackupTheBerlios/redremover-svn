@@ -1,5 +1,6 @@
 CFLAGS	+= -g -Wall
-LDFLAGS	+= -g -Wl,--gc-sections -Wl,--print-gc-sections
+LDFLAGS	+= -g -Wl,--gc-sections 
+# -Wl,--print-gc-sections
 
 
 ############################################################
