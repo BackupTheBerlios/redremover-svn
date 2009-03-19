@@ -45,6 +45,7 @@ EXASM := $(EXBIN).s
 
 EXBIN_T := $(EX)/t3
 EXASM_T := $(EXBIN_T).s
+EXBIN_O := $(EX)/t3.o
 
 
 SUBST_DIR := $(EX)/subst.d
@@ -75,8 +76,10 @@ $(SUBST_A): $(SUBST_SRC)
 # 		$(CC) -c -o $@ $<
 # 
 
-$(EXBIN_T): $(EXSRC) rr-translate.pl $(SUBST_A)
-	ASM_SUBST_DIR=$(shell pwd)/$(SUBST_DIR) $(CC) $(LDFLAGS) $(CFLAGS) -L$(SUBST_DIR) -lredrum -o $@ $<
+$(EXBIN_O): $(EXSRC) rr-translate.pl $(SUBST_A)
+	ASM_SUBST_OPT="-d -D" ASM_SUBST_DIR=$(shell pwd)/$(SUBST_DIR) $(CC) $(CFLAGS) -c -o $@ $<
+$(EXBIN_T): $(EXBIN_O) $(SUBST_A)
+	$(CC) $(LDFLAGS) -L$(SUBST_DIR) -o $@ $< -lredrum 
 	
 ex-a: $(EXBIN) rr-analyse.pl
 		-rm $(SUBST_DIR)/saved-* 2> /dev/null
