@@ -15,17 +15,21 @@ our $opt_o=undef;
 our $opt_M=48; 
 our $opt_m=3;
 our $opt_d=undef;
+our $opt_l=undef;
 our $opt_v=undef;
 
 my $help_text= "Usage: 
 
-$0 [-o dir] [-t threshold] [-m min] [-M max] [-d dumpfile] [-v] binary
+$0 [-o dir] [-t threshold] [-m min] [-M max] [-d dumpfile] [-v] [-l] binary
 
 This script uses objdump to disassemble the given binary,
 and displays some possible savings.
 
 With '-o' some kind of assembler dumps are put in the given directories for 
-all branches above a given threshold ('-t', default $opt_t)
+all branches above a given threshold ('-t', default $opt_t).
+Normally only lines with some need for a label are labelled; but sometimes 
+it would help if all assembler statements get labels, and that is what '-l' 
+is for.
 
 The default maximum depth is '-M $opt_M'; only chains with at least 
 $opt_m instructions are kept.
@@ -34,7 +38,7 @@ You can get a dump of the internal tree via '-d'; with '-v' you can see a
 bit of progress.
 ";
 
-getopts("o:hd:t:m:M:");
+getopts("o:hd:t:m:M:l");
 our $input=shift;
 
 $|=1;
@@ -108,7 +112,7 @@ sub MakeAsmRec
 	while ( ($k, $v) = each %$tree)
 	{
 		$l=$len+$v->{"len"};
-		@ops2=( ($v->{"need_label"} ? ":" : ()),
+		@ops2=( (($v->{"need_label"} || $opt_l) ? ":" : ()),
 			$k, @ops);
 
 		if (%{$v->{"+"}})
