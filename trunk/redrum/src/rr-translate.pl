@@ -99,7 +99,7 @@ sub ChangeText
 		{
 			warn("Would have translated, but no label ",
 				"for \"", $tr_last->op, "\" in\n",
-				"  ", $tr_last->file->filename, "\n");
+				"  ", $tr_last->file->filename, ":", $tr_last->nr, "\n");
 
 			$tr_last=$tr_last->nextOp;
 			$line=$line->nextOp;
