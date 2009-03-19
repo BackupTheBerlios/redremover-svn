@@ -35,7 +35,7 @@ $cmd= "set -o pipefail && ";
 # lines.
 # Note: We have to be careful about ASCII strings, which might contain ';'; 
 # such lines are currently ignored.
-	" perl -pe 's#;#\\n#g unless /\.(asciz|string)/;' |" .
+	" perl -pe 's#;#\\n#g unless /\\.(asciz|string)/;' |" .
 
 	($opt{"D"} ? " tee /tmp/a1-$$.s | " : "") .
 
