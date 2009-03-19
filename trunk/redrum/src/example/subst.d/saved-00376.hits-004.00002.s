@@ -2,9 +2,9 @@
 # This code part was originally seen at 0x00000000004004be
 # in example//test-prog; got 4 hits and was 94 bytes long.
 
-.globl RRauPaAyBJmauQhDlIktw3ZA
-.type RRauPaAyBJmauQhDlIktw3ZA, @function
-RRauPaAyBJmauQhDlIktw3ZA:
+.globl RRfF98nB2hyOf7oVjMCVaOnQ
+.type RRfF98nB2hyOf7oVjMCVaOnQ, @function
+RRfF98nB2hyOf7oVjMCVaOnQ:
 	movl g,%eax
 	subl $0x1,%eax
 	addl -0x4(%rbp),%eax
@@ -18,7 +18,7 @@ RRauPaAyBJmauQhDlIktw3ZA:
 	addl -0x4(%rbp),%edx
 	movl -0x4(%rbp),%ecx
 	movl $0x3,%eax
-	shll %cl,%eax
+	sall %cl,%eax
 	xorl -0x14(%rbp),%eax
 	imull %edx,%eax
 	leal (%rsi,%rax,1),%edx
