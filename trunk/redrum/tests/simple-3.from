@@ -1,0 +1,10 @@
+
+tmp:	.quad 11
+	.quad 12
+
+xX:
+	nop
+	nop
+	leave
+	nop
+	ret

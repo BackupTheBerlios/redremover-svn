@@ -1,0 +1,10 @@
+
+SRC	:= $(wildcard saved-*.s)
+OBJ	:= $(SRC:%.s=%.o)
+
+libredrum.a: $(OBJ)
+	ar crs $@ $^
+
+%.o: %.s
+	$(AS) -o $@ $<
+

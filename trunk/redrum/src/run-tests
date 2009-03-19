@@ -1,0 +1,19 @@
+#!/bin/sh
+
+tmp=/tmp/asm-tr.tmp
+
+for script in ../tests/*.from
+do 
+	dest=${script/.from/.to}
+	subst=${script/.from/.subst}
+	if [[ ! -e $subst ]] ; then subst=../tests/default.subst ; fi
+	PERLLIB=. ./rr-translate.pl -s $subst $script > $tmp
+	if diff -wu --ignore-blank-lines --ignore-matching-lines="^#" --label "$script (translated)" $tmp $dest
+	then
+		echo "Test $script ok."
+	else
+		echo "Unexpected output"
+		exit
+	fi
+done
+

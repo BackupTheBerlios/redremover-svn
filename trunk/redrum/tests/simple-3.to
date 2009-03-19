@@ -1,0 +1,5 @@
+tmp: .quad 11
+	.quad 12
+xX:
+	nop 
+	jmp X4

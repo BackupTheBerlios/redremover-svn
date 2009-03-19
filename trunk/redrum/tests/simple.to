@@ -1,0 +1,6 @@
+	cmpl	$0, -20(%rbp)
+	setg	%al
+	subl	$1, -20(%rbp)
+	movl	-4(%rbp), %eax
+	leave
+	ret

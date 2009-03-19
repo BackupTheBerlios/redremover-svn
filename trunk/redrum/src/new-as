@@ -1,0 +1,56 @@
+#!/usr/bin/perl
+
+
+$AS="/usr/bin/as.bin";
+$TRANS="/usr/bin/rr-translate";
+
+$env=delete $ENV{"ASM_SUBST_DIR"};
+exec $AS, @ARGV unless $env;
+
+$input=pop(@ARGV);
+
+
+$cmd= "set -o pipefail && ";
+
+( $INCDIR=readlink($TRANS) ) =~ s{/[^/]+$}{};
+
+{
+	$tmp="/tmp/a1-$$.S";
+# we need to support "-" as input, too - so a simply "cp" doesn't work.
+	$cmd .= " cat $input > $tmp && ".
+#		" strace -o /tmp/aa.$$ -f -tt -s 8192 " .
+#		" gcc " . $ENV{"COLLECT_GCC_OPTIONS"} . " -S $tmp | " .
+	#			"strace -o/tmp/aa -f -tt "
+
+# Remove #APP and similar, to avoid getting high-level source like 
+# "static inline", "while ()", "#define" etc. getting in the way.
+		" grep -v '^#' < $tmp | " .
+		" $AS -alm -o /dev/null - | " .
+		" tee /tmp/a2-$$.s | " .
+		" PERL5LIB=$INCDIR $TRANS " . 
+#		" /home/flip/perl/redrum/rr-translate.pl " . 
+		" -s" . $env . " - " .
+		" | tee /tmp/a3-$$.s " .
+		"| ";
+
+	$input="-";
+}
+
+$cmd .= join(" ", $AS, @ARGV, $input);
+
+if (0)
+{
+	$cmd .= " && rm $tmp";
+}
+else
+{
+	$cmd .= " && set >> $tmp ; echo '" . join("' '", @ARGV) . "' >> $tmp";
+}
+
+#%ENV=( "PATH" => $ENV{"PATH"} );
+
+# print "$cmd\n";
+
+exec "bash", "-c", $cmd;
+
+# vim: set sw=4 ts=4 et

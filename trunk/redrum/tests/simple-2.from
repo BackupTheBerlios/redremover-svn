@@ -1,0 +1,9 @@
+	leave
+	subl	$1, -20(%rbp)
+	movl	-4(%rbp), %eax
+	nop
+	leave
+	nop
+	leave
+	nop
+	ret

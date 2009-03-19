@@ -1,0 +1,137 @@
+Redundancy Remover
+==================
+
+(C)opyright 2009 by Ph. Marek, philipp <%40> marek.priv.at
+
+Released under the GPLv3.
+
+
+What is this?
+=============
+
+RR is a set of scripts to find duplicated code in binary files (like 
+executables and shared objects), and to eliminate them by translating the 
+assembler output of gcc before it's being converted to object code.
+
+
+And this works?
+===============
+
+Yes, it does. See test results below.
+
+I chose to test FSVS because
+- it's my pet project, and so I know exactly how to compile it;
+- it has extensive tests, which I can use to verify the translation;
+- it's of a representative size.
+
+A bigger (partly done) test is with libgcj9; see below, too.
+
+
+How does this work?
+===================
+
+Please see the POD documentation in the rr-translate perl script.
+
+
+Note about the savings
+======================
+
+The values given by the script are just predictions for perfect 
+translations, which won't be really seen.
+
+
+FSVS results
+============
+
+The compilation took a bit more than twice as long; without translation 
+14.8 sec to 35.2 sec.
+
+The prediction was 2424 bytes, the real size difference 2128 bytes (0.8%):
+  size:
+     text    data     bss     dec     hex filename
+   259824    7960   11136  278920   44188 fsvs
+   257696    7960   11136  276792   43938 fsvs.translated
+
+
+Linux kernel results
+====================
+
+I ran this on my custom linux kernel:
+     text	   data	    bss	    dec	    hex	filename
+  4651138	2149868	6551208	13352214	 cbbd16	/usr/src/linux/vmlinux
+
+and got a prediction of about 37kB:
+  max savings: 159513
+  real savings approximate 37917 bytes.
+  Writing files to /tmp.
+  645 files written.
+
+In real life a bit less is to be expected; but 32kB should be possible.
+
+
+libgcj9 results
+===============
+
+As I didn't have the sources available (at this moment), I only looked at 
+the analyse results.
+
+I took /usr/lib/libgcj.so.90 from debian:
+  libgcj9-0     4.3.3-3   Java runtime library for use with gcj
+  -rw-r--r-- 1 root root 46903400 31. Jän 05:23 /usr/lib/libgcj.so.90
+
+which, I believe, is one of the best cases, because it includes a high 
+number of functions, where tail packing (;-) can be done.
+
+Analysing takes about 500MB RAM, and runs on a 800MHz machine for
+  real  1m36.873s
+  user  1m36.426s
+  sys   0m3.636s
+
+The (unbelieveable) output is (surely wrong; but a straight compile of this 
+library would give real hard numbers, so I stopped my bug hunting)
+  max savings: 736313
+  real savings approximate 1561073 bytes.
+
+
+As an example of an output dump:
+
+  # Redundancy Remover generated file.
+  # This code part was originally seen at 0x00000000016a9750
+  # got 129 hits in /usr/lib/libgcj.so.90, and was 158 bytes long.
+  
+  .globl RRGh7K3nv6Ocjw48SB5SACg
+  .type RRGh7K3nv6Ocjw48SB5SACg, @function
+  
+    mov $0x4,%edi
+    callq _Jv_ThrowBadArrayIndex
+    nopw 0x0(%rax,%rax,1)
+    mov $0x5,%edi
+    callq _Jv_ThrowBadArrayIndex
+    nopw 0x0(%rax,%rax,1)
+    mov $0x6,%edi
+    callq _Jv_ThrowBadArrayIndex
+    nopw 0x0(%rax,%rax,1)
+    mov $0x7,%edi
+    callq _Jv_ThrowBadArrayIndex
+    nopw 0x0(%rax,%rax,1)
+    mov $0x8,%edi
+    callq _Jv_ThrowBadArrayIndex
+    nopw 0x0(%rax,%rax,1)
+    mov $0x9,%edi
+    callq _Jv_ThrowBadArrayIndex
+    nopw 0x0(%rax,%rax,1)
+    mov $0xa,%edi
+    callq _Jv_ThrowBadArrayIndex
+    nopw 0x0(%rax,%rax,1)
+    mov $0xb,%edi
+    callq _Jv_ThrowBadArrayIndex
+    mov $0xc,%edi
+    callq _Jv_ThrowBadArrayIndex
+    mov $0xd,%edi
+    callq _Jv_ThrowBadArrayIndex
+    xchg %ax,%ax
+    sub $0x8,%rsp
+    callq _ZN4java4util18ListResourceBundleC1Ev
+    add $0x8,%rsp
+    retq 
+  
