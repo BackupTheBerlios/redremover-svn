@@ -79,9 +79,9 @@ $(EXBIN_T): $(EXSRC) rr-translate.pl $(SUBST_A)
 	ASM_SUBST_DIR=$(shell pwd)/$(SUBST_DIR) $(CC) $(LDFLAGS) $(CFLAGS) -L$(SUBST_DIR) -lredrum -o $@ $<
 	
 ex-a: $(EXBIN) rr-analyse.pl
-		rm $(SUBST_DIR)/saved-*
+		-rm $(SUBST_DIR)/saved-* 2> /dev/null
 		./rr-analyse.pl -m1 -M48 -t2 -o $(SUBST_DIR) $<
 
 clean:
-		rm $(EX)/*.deass $(EX)/*.s $(EX)/*.o $(EXBIN) $(EXBIN_T) 2> /dev/null || true
+		-rm $(EX)/*.deass $(EX)/*.s $(EX)/*.o $(EXBIN) $(EXBIN_T) 2> /dev/null
 
