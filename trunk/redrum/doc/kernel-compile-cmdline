@@ -4,9 +4,17 @@
 make arch/x86/vdso/vclock_gettime.o arch/x86/vdso
 
 
-ASM_SUBST_OPT="-d -D"
 
-ASM_SUBST_OPT="" \
-	HOST_LOADLIBES="-L/usr/src/redrum -lredrum" \
-	ASM_SUBST_DIR=/usr/src/redrum/ \
-	make vmlinux
+
+Normally I try to compile with this line:
+	ASM_SUBST_OPT="" \
+		HOST_LOADLIBES="-L/usr/src/redrum -lredrum" \
+		ASM_SUBST_DIR=/usr/src/redrum/ \
+		make vmlinux -k -j3
+
+and then take a look at individual problems via
+	ASM_SUBST_OPT="-d -D"
+		HOST_LOADLIBES="-L/usr/src/redrum -lredrum" \
+		ASM_SUBST_DIR=/usr/src/redrum/ \
+		make vmlinux
+
