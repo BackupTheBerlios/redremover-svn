@@ -77,7 +77,8 @@ $(SUBST_A): $(SUBST_SRC)
 # 
 
 $(EXBIN_O): $(EXSRC) rr-translate.pl $(SUBST_A)
-	ASM_SUBST_OPT="-d -D" ASM_SUBST_DIR=$(shell pwd)/$(SUBST_DIR) $(CC) $(CFLAGS) -c -o $@ $<
+	#ASM_SUBST_OPT="-d -D" 
+	ASM_SUBST_DIR=$(shell pwd)/$(SUBST_DIR) $(CC) $(CFLAGS) -c -o $@ $<
 $(EXBIN_T): $(EXBIN_O) $(SUBST_A)
 	$(CC) $(LDFLAGS) -L$(SUBST_DIR) -o $@ $< -lredrum 
 	
