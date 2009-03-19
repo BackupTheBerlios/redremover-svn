@@ -8,3 +8,9 @@ Jumps with adresses _init+0x4d
 -----------------------------
 
 Need a label generated, but how?
+
+
+Differing opcode names
+----------------------
+
+sall == shll ??

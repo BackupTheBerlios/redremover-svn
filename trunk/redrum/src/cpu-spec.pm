@@ -38,13 +38,24 @@ sub NormalizeOps
 {
 	my($op, $operand)=@_;
 
-	if ($op eq "lea")
+	if ($op =~ /^lea/)
 	{
 #	lea (%rcx,%rax,1), %eax  ==> lea (%rcx,%rax), %eax
-	  $operand =~ s/ \( ( \%\w+ , \%\w+ ) ,1\) / ($1) /x;
+	  $operand =~ s/ \( ( \%\w+ , \%\w+ ) ,1\) /($1)/x;
 	}
 
-	return $operand;
+	if ($op =~ /^mov/)
+	{
+#	mov variable(%rip)... ==> mov variable...
+	  $operand =~ s/ (\w+) \(\%rip\) /$1/x;
+	}
+
+
+# are these really identical?
+	$op="sall" if ($op eq "shll");
+
+
+	return ($op, $operand);
 }
 
 1;

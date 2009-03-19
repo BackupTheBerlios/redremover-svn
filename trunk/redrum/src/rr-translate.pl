@@ -159,7 +159,8 @@ sub FindSubstitution
 			# Non-jump opcodes must have identical operands.
 			# TODO: small differences allowed, by a subroutine definition with 
 			# params?
-			D("!= operand"),last if !exists($tree->{ $ori_line->operands });
+			D("!= operand: ", join("|", keys %{$tree})),
+					last if !exists($tree->{ $ori_line->operands });
 
 			$tree=$tree->{ $ori_line->operands };
 		}
@@ -375,7 +376,11 @@ sub new
 			# Must be a word boundary, else "r10d" would get translated, too.
 			$operands =~ s/\b(0x?[a-f0-9]+)/oct($1)/ie;
 
-			$operands = main::NormalizeOps($opcode, $operands);
+			# Remove whitespace around ','.
+			$operands =~ s/\s*,\s*/,/g;
+
+			($opcode, $operands) = main::NormalizeOps($opcode, $operands);
+			main::D("OP: $operands") if $operands =~ /\(/;
 		}
 
 
