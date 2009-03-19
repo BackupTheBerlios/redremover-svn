@@ -35,7 +35,14 @@ $cmd= "set -o pipefail && ";
 # lines.
 # Note: We have to be careful about ASCII strings, which might contain ';'; 
 # such lines are currently ignored.
-	" perl -pe 's#;#\\n#g unless /\.asciz/;' |" .
+	" perl -pe 's#;#\\n#g unless /\.(asciz|string)/;' |" .
+
+# Bug in as 2.19.1: sometimes multiple strings get written in a single 
+# line, like this one with 27k characters:
+#   .string " \t\n\\".LC3: .string "file\t".LC4: .string "partition"...
+# The other strings are repeated in lines below, too - so we just kill 
+# them here.
+	q( perl -pe 's/(\.string ".*?[\\\\]{2}")\.L.*/$1/;' |) .
 
 	($opt{"D"} ? " tee /tmp/a1-$$.s | " : "") .
 
