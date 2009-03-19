@@ -9,36 +9,17 @@ use Getopt::Std;
 require "cpu-spec.pm";
 
 
+$Data::Dumper::Maxdepth=4;
+
 our($opt_s, $opt_h, $opt_D);
-getopts("s:hD:");
+getopts("s:hD");
 die "Usage:
 
 $0  -s {substitution directory or file} {input.s}
 " if $opt_h;
 
 my $input=shift();
-
-$opt_D=0;
-
-
-if ($opt_D >= 2)
-{
-	my $i=$input;
-	my $inp;
-
-	$i =~ s#[^\w]+#_#g;
-	$i .= time() . ".$$";
-	open(IN, "> /tmp/input-$i.txt") || die $!;
-	open(OUT, "| tee /tmp/output-$i.txt") || die $!;
-	open(STDOUT, ">&OUT") || die $!;
-	$SIG{"__DIE__"}=sub { close STDOUT; };
-}
-
 our $original=new AsmFile("< $input", sub { print IN $_; } );
-
-
-$Data::Dumper::Maxdepth=4;
-
 
 
 our $translate=[];
