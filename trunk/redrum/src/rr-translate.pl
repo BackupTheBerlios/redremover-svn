@@ -19,14 +19,14 @@ $0  -s {substitution directory or file} {input.s}
 " if $opt_h;
 
 my $input=shift();
-our $original=new AsmFile("< $input", sub { print IN $_; } );
+our $original=new AsmFile($input, sub { print IN $_; } );
 
 
 our $translate=[];
 for (-d $opt_s ? <$opt_s/*.s> : $opt_s)
 {
 	D("loading translation $_");
-	push @$translate, new AsmFile("< $_");
+	push @$translate, new AsmFile($_);
 }
 
 
@@ -93,6 +93,16 @@ sub ChangeText
 
 			$tr_last=$tr_next if $tr_next;
 			$tr_next=undef;
+		}
+
+		while (!$tr_last->labels)
+		{
+			warn("Would have translated, but no label ",
+				"for \"", $tr_last->op, "\" in\n",
+				"  ", $tr_last->file->filename, "\n");
+
+			$tr_last=$tr_last->nextOp;
+			$line=$line->nextOp;
 		}
 
 		D("labels:", join("; ", $tr_last->labels));
@@ -302,7 +312,7 @@ sub new
 			"marks" => [], 
 		}, $class);
 
-	open($fhdl, ( ($fn eq "-") ? "<& STDIN" : $fn )
+	open($fhdl, ( ($fn eq "-") ? "<& STDIN" : ("<", $fn) )
 	) || die "open $fn: $!";
 
 
