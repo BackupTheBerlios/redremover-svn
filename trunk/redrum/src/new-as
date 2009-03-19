@@ -19,24 +19,40 @@ $cmd= "set -o pipefail && ";
 ( $INCDIR=readlink($TRANS) ) =~ s{/[^/]+$}{};
 
 {
-	$tmp="/tmp/a1-$$.S";
-# we need to support "-" as input, too - so a simply "cp" doesn't work.
-
 	$cmd .= 
+
+# we need to support "-" as input, too - so a "< $input" doesn't work.
+
 # Remove #APP and similar, to avoid getting high-level source like 
 # "static inline", "while ()", "#define" etc. getting in the way.
 	" grep -v '^#' $input | " .
+
+# During compilation of eg. arch/x86/kernel/head_64.o we get lines like
+#   .balign (1 << 12); .globl init_level4_pgt; .p2align 4,,15; init_level4_pgt:
+# which have after the "as" command only the ".balign" left; then the 
+# labels are missing, and compilation fails.
+# We split multiple assembler statements separated with ";" into multiple 
+# lines.
+# Note: We have to be careful about ASCII strings, which might contain ';'; 
+# such lines are currently ignored.
+	" perl -pe 's#;#\\n#g unless /\.asciz/;' |" .
+
 	($opt{"D"} ? " tee /tmp/a1-$$.s | " : "") .
-	($opt{"M"} ? "" : 
+
 # ASM macros are now done via "as", previously via 
 # " gcc " . $ENV{"COLLECT_GCC_OPTIONS"} . " -S $tmp | " .
+	($opt{"M"} ? "" : 
 		" $AS -alm -o /dev/null - | " .
+
 		($opt{"D"} ? " tee /tmp/a2-$$.s | " : "") ) .
+
 # The actual translation
 	" PERL5LIB=$INCDIR $TRANS " . 
 	($opt{"d"} ? "-D " : "") .
 	" -s" . $env . " - " .
+
 	($opt{"D"} ? " | tee /tmp/a3-$$.s " : "") .
+
 	"| ";
 
 	$input="-";
