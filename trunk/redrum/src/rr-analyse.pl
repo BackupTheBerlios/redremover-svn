@@ -45,7 +45,7 @@ could possibly be turned into a function with parameters.
 With '-O2' the whole operands are removed.
 ";
 
-getopts("o:hd:t:m:M:lO:");
+getopts("o:hd:t:m:M:lO:v");
 our $input=shift;
 
 $|=1;
@@ -384,5 +384,6 @@ sub ReadBinary
 sub Progress
 {
 	return unless -t STDERR;
-	print @_,"\r";
+	return unless $opt_v;
+	print STDERR @_,"\r";
 }
