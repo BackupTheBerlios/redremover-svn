@@ -12,6 +12,7 @@ require "cpu-spec.pm";
 our($opt_h);
 our $opt_t=4;
 our $opt_o=undef;
+our $opt_O=0;
 our $opt_M=48; 
 our $opt_m=3;
 our $opt_d=undef;
@@ -20,7 +21,9 @@ our $opt_v=undef;
 
 my $help_text= "Usage: 
 
-$0 [-o dir] [-t threshold] [-m min] [-M max] [-d dumpfile] [-v] [-l] binary
+$0 [-o dir] [-t threshold] [-v] [-l] binary
+
+Further options are: [-m min] [-M max] [-d dumpfile] [-O 1|2]
 
 This script uses objdump to disassemble the given binary,
 and displays some possible savings.
@@ -36,9 +39,13 @@ $opt_m instructions are kept.
 
 You can get a dump of the internal tree via '-d'; with '-v' you can see a 
 bit of progress.
+
+'-O1' removes constants from the operands; then you can see which sequences 
+could possibly be turned into a function with parameters.
+With '-O2' the whole operands are removed.
 ";
 
-getopts("o:hd:t:m:M:l");
+getopts("o:hd:t:m:M:lO:");
 our $input=shift;
 
 $|=1;
@@ -59,7 +66,7 @@ our $max_savings=0;
 our $real_savings=0;
 
 ReadBinary(\%tree, $input);
-print "max savings: $max_savings\n";
+print "max savings: $max_savings           \n";
 
 
 
@@ -112,8 +119,22 @@ sub MakeAsmRec
 	while ( ($k, $v) = each %$tree)
 	{
 		$l=$len+$v->{"len"};
+		my $op=$k;
+
+		# We don't want an additional "\n" at the end.
+		if ($opt_O)
+		{
+			my $o = $v->{"oprs"};
+			my @k=keys %{$o};
+
+			$op .= @k==1 ? ($opt_O == 1 ? "" : " # " . $k[0]) :
+				"\n" . join("\n",
+				map { "\t\t" . $o->{$_} . "x " . $_; } 
+				sort { $o->{$b} <=> $o->{$a}; } @k);
+		}
+
 		@ops2=( (($v->{"need_label"} || $opt_l) ? ":" : ()),
-			$k, @ops);
+			$op, @ops);
 
 		if (%{$v->{"+"}})
 		{
@@ -243,6 +264,7 @@ sub InsertIntoTree
 		if ($adr_used->{ $cur->{"adr"} });
 
 		$tree->{ $cur->{"op"} }{"funcs"}{ $cur->{"func"} }=1;
+		$tree->{ $cur->{"op"} }{"oprs"}{ $cur->{"ropr"} }++ if $opt_O;
 
 		$tree = $tree->{ $cur->{"op"} }{"+"};
 	}
@@ -302,11 +324,24 @@ sub ReadBinary
 		# Normalize whitespace
 		$operands =~ s#\s+# #g;
 
+		$abs_adr = "0x" . $abs_adr if $abs_adr;
+
 		# Substitute absolute addresses (%rip-relative)
 		# Adresses that are "label+-something" can't be used by the assembler.
-		$adr_trl = "0x" . $abs_adr
-			if !$adr_trl || ($adr_trl =~ m#[+-]#);
+#		$adr_trl = $abs_adr || $operands
+#			if !$adr_trl || ($adr_trl =~ m#[+-]#);
 		$operands =~ s{ \b ( 0x[0-9a-f]+ \( \%rip \) ) }{$adr_trl}xi;
+
+		my $opr2= isUncondJump($opcode) ? 
+			join(" # ", $adr_trl, $abs_adr, $operands)  :
+			isCall($opcode) ? ($adr_trl || $operands) : $operands;
+
+			my $no_const_ops=$opr2;
+			$no_const_ops =~ s/(^|\W)[a-f0-9]+(\W|$)/*/gi;
+
+			my @op_ops= ($opt_O == 2) ? () : 
+			($opt_O == 1) ? ($no_const_ops) : 
+			($opr2);
 
 		$cur = {
 #			"opc" => $opcode,
@@ -316,9 +351,8 @@ sub ReadBinary
 #			"tr" => $adr_trl,
 			"+" 	=> {},
 			"len" => int( (length($bytes)+1)/3 ),
-			"op"  => $opcode . " " .
-			( isUncondJump($opcode) ? ($adr_trl || $abs_adr) :
-				isCall($opcode) ? ($adr_trl || $operands) : $operands),
+			"op"  => (join(" ", $opcode, @op_ops)),
+			($opt_O ? ("ropr"  => $opr2) : ()),
 		};
 
 #				if (isCall($opcode)) { print Dumper($_, $cur); exit; }
