@@ -333,7 +333,7 @@ sub ReadBinary
 		$operands =~ s{ \b ( 0x[0-9a-f]+ \( \%rip \) ) }{$adr_trl}xi;
 
 		my $opr2= isUncondJump($opcode) ? 
-			join(" # ", $adr_trl, $abs_adr, $operands)  :
+			join(" # ", grep(/\S/, $adr_trl, $abs_adr, $operands))  :
 			isCall($opcode) ? ($adr_trl || $operands) : $operands;
 
 			my $no_const_ops=$opr2;
