@@ -35,6 +35,7 @@ $cmd= "set -o pipefail && ";
 # lines.
 # Note: We have to be careful about ASCII strings, which might contain ';'; 
 # such lines are currently ignored.
+# Fix due in 2.20.
 	" perl -pe 's#;#\\n#g unless /\\.(asciz|string)/;' |" .
 
 	($opt{"D"} ? " tee /tmp/a1-$$.s | " : "") .
@@ -45,6 +46,8 @@ $cmd= "set -o pipefail && ";
 # This is not entirely correct - we'd have to pass options like the 
 # destination architecture (32/64) etc.
 		" $AS -alm -o /dev/null - | " .
+# Doesn't work - another bug in as.
+#		" $AS -alm -o /dev/null /proc/self/fd/0 | " .
 
 # Bug in as 2.19.1: sometimes multiple strings get written in a single 
 # line, like this one with 27k characters:
@@ -52,6 +55,7 @@ $cmd= "set -o pipefail && ";
 # The other strings are repeated in lines below, too - so we just kill 
 # them here.
 	q( perl -pe 's/(\.string\s+".*?[\\\\]{2}").*/$1/;' |) .
+# Fix due in 2.20.
 
 
 # The assembler listing gives two labels for ENTRY(wakeup_long64) in
